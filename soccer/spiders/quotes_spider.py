@@ -17,18 +17,22 @@ class QuotesSpider(scrapy.Spider):
             f.write(response.body)
 
 
-    teams = response.css('.table-header')[1:]
-    team_names = [team.get().split('>')[-3][:-3] for team in teams]
+        teams = response.css('.table-header')[1:]
+        team_names = [team.get().split('>')[-3][:-3] for team in teams]
 
-    tables = response.css('table')[3:]
-    response.css('table/tr')
+        tables = response.css('table')[3:]
+        #response.css('table/tr')
 
 
 def parsetable(table):
     table_header = table.css('tr')[0]
     table_header_values = table_header.css('th')
-    table_header_values = map(lambda x: x.split('>')[-1][:-4], table_header_values)
+    table_header_values = map(lambda x: x.get().split('>')[-1][:-4], table_header_values)
 
     table_rows = table.css('tr')[1:]
+    return table_rows
 
+# Run this to go into shell interactive mode:
+# scrapy shell "https://www.transfermarkt.com/laliga/transfers/wettbewerb/ES1/plus/?saison_id=2010&s_w=&leihe=0&leihe=1&intern=0&intern=1"
 
+# Scrapy examples: https://docs.scrapy.org/en/latest/intro/tutorial.html
