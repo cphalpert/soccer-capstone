@@ -1,1 +1,1 @@
-# soccer-scraper
+# Soccer Capstone
