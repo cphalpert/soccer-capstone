@@ -2,7 +2,7 @@
 """
 Spyder Editor
 
-This is a temporary script file.
+Author: Feng Ye
 """
 
 import pandas as pd
@@ -35,5 +35,20 @@ def df_transform(df, typ):
 arrival_df = df_transform(arrival_df, "arrivals")
 departure_df = df_transform(departure_df, "departures")
 
-arrival_df.to_csv("arrivals.csv", encoding="utf_8")
-departure_df.to_csv("departures.csv", encoding="utf_8")
+#arrival_df.to_csv("arrivals.csv", encoding="utf_8")
+#departure_df.to_csv("departures.csv", encoding="utf_8")
+
+arrival_df.columns = ['index', 'name', 'age', 'nationality', 'position', 'pos', 'market_val', 'club_from', \
+                      'country_from', 'transfer_fee', 'club_to', 'season']
+arrival_df["country_to"] = "Spain"
+
+departure_df.columns = ['index', 'name', 'age', 'nationality', 'position', 'pos', 'market_val', 'club_to', \
+                        'country_to', 'transfer_fee', 'club_from', 'season']
+departure_df['country_from'] = "Spain"
+
+main_df = arrival_df.append(departure_df, ignore_index=True)
+
+main_df = main_df.drop("index", 1)
+main_df = main_df.drop_duplicates()
+#main_df[main_df['name']=='Florent Sinama-Pongolle']
+main_df.to_csv("Combined_Transfers.csv")
