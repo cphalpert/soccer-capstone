@@ -1,0 +1,42 @@
+---
+title: "R Notebook"
+output: word_document
+---
+
+
+```{r}
+df <- read.csv("Players_Combined_v3.csv", header=TRUE, sep=",")
+
+```
+
+```{r}
+library(tidyverse)
+
+ggplot(df, aes(x=reorder(position, market_val), y=market_val)) + geom_boxplot() + coord_flip() + ggtitle("Figure 1. Boxplot of Market Values by Position") + xlab("position")
+```
+Contrary to popular beliefs that forward is the highest paying position in soccer, we can see from Figure 1 that AM(CR) or attacking midfielder center right and M(L) or left midfielder are the highest compensated groups. It is worth noting that superstars such as Lionel Messi and Cristiano Ronaldo can play multiple positions, and they can play either as midfielder or forward depending on the opposing matchup and immediate need of their teams. Therefore the inclusion of those superstars in the aforementioned midfielder categories indeed inflates the overall distribution. And it is clear from the plot that defenders do on average have lower market values than other positions, but there are still plenty of outliers where teams are willing to pay in excess of 10M pounds for a top defender. 
+
+```{r}
+ggplot(df, aes(x=market_val_prev, y=market_val)) + geom_point() + geom_smooth(method="loess") + facet_wrap(~season) + ggtitle("Figure 2. Market Value vs. Market Value of Previous Year By Season")
+```
+According to Figure 2, market value of previous year is highly positively correlated with current market value. Looking across the seasons, there seems to be higher market values for the most expensive players as time goes on, indicating an increasing abundance of buying power and the demand for raw talent and star power. Year 2015 stands out as many players have fetched higher market values than what the regression line would have predicted.
+
+```{r}
+library(viridis)
+
+df$market_val_log <- log(df$market_val)
+ggplot(df, aes(y=team, x=pos_type)) + geom_tile(aes(fill=df$market_val_log)) + scale_fill_viridis() + labs(fill = "Market value (log)") + ggtitle("Figure 3. Heatmap of Market Value By Teams and Position Type")
+```
+Shown by Figure 3 above, the La Liga is highly polarized in terms of club wealth. Four teams stand out in terms of total net worth, Barcelona, Real Madrid, Valencia and Atletico Madrid. While the less wealthy teams can only spend a lot less and fight for survival in the lower rung of league ranking, top teams have the ability to pour lavish sums of cash to acquire megastars and dominate the ranking for years. Examining the graph closely, we can also tell the personnel priority of each team, where Barcelona placed the most emphasis on its defensive line, Valencia chose to focus on building a high-value midfield lineup.
+
+```{r}
+library(gridExtra)
+
+p1 <- ggplot(df, aes(Rating, color=pos_type, fill=pos_type)) + geom_density(alpha=0.2)
+p2 <- ggplot(df, aes(Mins, color=pos_type, fill=pos_type)) + geom_density(alpha=0.2)
+p3 <- ggplot(df, aes(pass_success, color=pos_type, fill=pos_type)) + geom_density(alpha=0.2)
+p4 <- ggplot(df, aes(shots_per_game, color=pos_type, fill=pos_type)) + geom_density(alpha=0.2)
+
+grid.arrange(p1, p2, p3, p4, ncol=2, top = "Figure 4. Density Plot of Performance by Position")
+```
+Based on Figure 4, it is somewhat surprising that defenders have the highest median rating, though midfielders who can play multiple positions dominate the higher end of the rating spectrum. Defenders also play the most minutes, where substantial portion of forwards and midfielders play less than 1500 minutes in a season, and the phenomenon is attributed to managers' tendencies to substitute forwards and midfielders late in the game to boost offensive output, especially when the team is down a goal or needs to break the draw. Fowards on average have lower passing success rate than others, as passing accurately is more difficult as ball advances closer to the opponent's goal. But there is a small group of elite forwards can pass at over 80%. Forwards and midfielders understandably also have more shots per game than defenders, thus shouldering the main responsibilities in creating and making shots.   
