@@ -24,7 +24,7 @@ df3$pos_detail <- gsub("FW", "Forward", df3$pos_detail)
 df3$pos_type <- factor(df3$pos_type, levels=c("Forward", "Midfielder", "Defender"))
 
 ggplot(df3, aes(x=reorder(pos_detail, market_val), y=market_val, color=pos_type)) + 
-  geom_boxplot() + coord_flip() + 
+  geom_boxplot() + coord_flip() + geom_hline(aes(yintercept=median(market_val)), alpha=0.5) +
   ggtitle("Figure 1. Boxplot of Market Values by Position") +
   xlab("position") + ylab("market value (pounds, millions)") +
   scale_y_continuous(labels = function(x) format(x/1000000))
