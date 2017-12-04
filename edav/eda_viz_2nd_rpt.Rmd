@@ -17,7 +17,8 @@ df3 <- df3 %>% filter(position != "Forward" & position != "Midfielder" & positio
 df3$pos_type <- factor(df3$pos_type, levels=c("Forward", "Midfielder", "Defender"))
 
 ggplot(df3, aes(x=reorder(position, market_val), y=market_val)) + geom_boxplot() +
-  coord_flip() + ggtitle("Figure 1. Boxplot of Market Values by Position") + xlab("position") + ylab("market value (pounds, millions)") +
+  coord_flip() + ggtitle("Figure 1. Boxplot of Market Values by Position") + 
+  xlab("position") + ylab("market value (pounds, millions)") +
   scale_y_continuous(labels = function(x) format(x/1000000)) + facet_wrap(~pos_type)
 ```
 Contrary to popular beliefs that forward is the highest paying position in soccer, we can see from Figure 1 that AM(CR) or attacking midfielder center right and M(L) or left midfielder are the highest compensated groups. It is worth noting that superstars such as Lionel Messi and Cristiano Ronaldo can play multiple positions, and they can play either as midfielder or forward depending on the opposing matchup and immediate need of their teams. Therefore the inclusion of those superstars in the aforementioned midfielder categories indeed inflates the overall distribution. And it is clear from the plot that defenders do on average have lower market values than other positions, but there are still plenty of outliers where teams are willing to pay in excess of 10M pounds for a top defender. 
