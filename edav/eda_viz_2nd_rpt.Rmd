@@ -27,7 +27,8 @@ ggplot(df3, aes(x=reorder(pos_detail, market_val), y=market_val, color=pos_type)
   geom_boxplot() + coord_flip() + geom_hline(aes(yintercept=median(market_val)), alpha=0.5) +
   ggtitle("Figure 1. Boxplot of Market Values by Position") +
   xlab("position") + ylab("market value (pounds, millions)") +
-  scale_y_continuous(labels = function(x) format(x/1000000))
+  scale_y_continuous(labels = function(x) format(x/1000000)) +
+  theme(legend.position="bottom")
 ```
 Contrary to popular beliefs that forward is the highest paying position in soccer, we can see from Figure 1 that AM(CR) or attacking midfielder center right and M(L) or left midfielder are the highest compensated groups. It is worth noting that superstars such as Lionel Messi and Cristiano Ronaldo can play multiple positions, and they can play either as midfielder or forward depending on the opposing matchup and immediate need of their teams. Therefore the inclusion of those superstars in the aforementioned midfielder categories indeed inflates the overall distribution. And it is clear from the plot that defenders do on average have lower market values than other positions, but there are still plenty of outliers where teams are willing to pay in excess of 10M pounds for a top defender. 
 
@@ -56,7 +57,7 @@ ggplot(df2, aes(y=reorder(team, avg_mv_log), x=pos_type)) +
   geom_tile(aes(fill=df2$avg_mv_log)) +
   scale_fill_viridis() + labs(fill = "average market value (log)") +
   xlab("position type") + ylab("team rank by log of average market value") +
-  ggtitle("Figure 3. Heatmap of Market Value By Teams and Position Type")
+  ggtitle("Figure 3. Heatmap of Log of Market Values")
 ```
 Shown by Figure 3 above, the La Liga is highly polarized in terms of club wealth. Four teams stand out in terms of total net worth, Barcelona, Real Madrid, Valencia and Atletico Madrid. While the less wealthy teams can only spend a lot less and fight for survival in the lower rung of league ranking, top teams have the ability to pour lavish sums of cash to acquire megastars and dominate the ranking for years. Examining the graph closely, we can also tell the personnel priority of each team, where Barcelona placed the most emphasis on its midfield lineup, Real Madrid chose to focus on building a formidable frontline.
 
