@@ -1,70 +1,110 @@
 import scrapy
 import pandas as pd
 import pickle
+from itertools import product
 
-
-class QuotesSpider(scrapy.Spider):
+class QuotesSpider2(scrapy.Spider):
     name = "quotes"
 
-    base_url = 'https://www.transfermarkt.com/laliga/transfers/wettbewerb/ES1/plus/?saison_id={year}&s_w=&leihe=0&leihe=1&intern=0&intern=1'
-
+    base_url = 'https://www.transfermarkt.co.uk/{team_slug}/kader/verein/{team_id}/plus/1/galerie/0?saison_id={year}'
+    print 'loaded'
     years = range(2008, 2018)
 
-    start_urls = [base_url.format(year=year) for year in years]
+    teams = [('athletic-bilbao', 621),
+            ('atletico-madrid', 13),
+            ('ca-osasuna', 331),
+            ('cd-leganes', 1244),
+            ('cd-numancia', 2296),
+            ('cd-teneriffa', 648),
+            ('celta-vigo', 940),
+            ('deportivo-alaves', 1108),
+            ('deportivo-la-coruna', 897),
+            ('deportivo-xerez', 134),
+            ('espanyol-barcelona', 714),
+            ('fc-barcelona', 131),
+            ('fc-cordoba', 993),
+            ('fc-elche', 1531),
+            ('fc-getafe', 3709),
+            ('fc-girona', 12321),
+            ('fc-granada', 16795),
+            ('fc-malaga', 1084),
+            ('fc-sevilla', 368),
+            ('fc-valencia', 1049),
+            ('fc-villarreal', 1050),
+            ('hercules-alicante', 7971),
+            ('racing-santander', 630),
+            ('rayo-vallecano', 367),
+            ('rcd-mallorca', 237),
+            ('real-betis-sevilla', 150),
+            ('real-madrid', 418),
+            ('real-saragossa', 142),
+            ('real-sociedad-san-sebastian', 681),
+            ('real-valladolid', 366),
+            ('recreativo-huelva', 2867),
+            ('sd-eibar', 1533),
+            ('sporting-gijon', 2448),
+            ('ud-almeria', 3302),
+            ('ud-las-palmas', 472),
+            ('ud-levante', 3368)]
+
+    start_urls = []
+
+    for year, team in product(years, teams):
+        start_urls.append(base_url.format(year=year, team_slug=team[0], team_id =team[1]))
 
     def parse(self, response):
         year = response.url.split("=")[1][:4]
-        filename = 'year-%s.p' % year
 
-        teams = response.css('.table-header')[1:]
-        team_names = [team.get().split('>')[-3][:-3] for team in teams]
+        
+        
+        table = response.css('.items')[0]
+        
+        team_name = response.url.split("/")[3]
 
+        filename = 'year-%s-%s.p' % (year, team_name)
 
-        doubled_team_names = [x for pair in zip(team_names,team_names) for x in pair]
-
-        tables = response.css('table')[3:]
-
-
-        extracted_tables = []
-
-        for team_name, table in zip(doubled_team_names, tables):
-            table_df = extract_table(table)
-            table_df['team_name'] = team_name
-            table_df['year'] = year
-            extracted_tables.append(table_df)
-
+        table_df = extract_table(table)
+        table_df['team_name'] = team_name
+        table_df['year'] = year
+        
         with open(filename, 'wb') as f:
-            pickle.dump(extracted_tables, f)
+            pickle.dump(table_df, f)
 
-        print len(extracted_tables)
+    
 
 def extract_table(table):
     table_header = table.css('tr')[0]
     table_header_values = table_header.css('th')
-    table_header_values = map(lambda x: x.get().split('>')[-2][:-4], table_header_values)
-    table_header_values = table_header_values[:7] + ['Country'] + [table_header_values[7]]
+    columnns = ['#', 'Player(s)', 'born/age', 'Nat1', 'Nat2', 'Height', 'Foot', 'In the team since', 'before', 'Contract until', 'Market value']
+
     extracted_rows = []
     table_rows = table.css('tr')[1:]
     for row in table_rows:
-        extracted_rows.append(parse_row(row))
-    return pd.DataFrame.from_records(columns=table_header_values, data=extracted_rows)
+        try:
+            extracted_rows.append(parse_row(row))
+        except:
+            pass
+    return pd.DataFrame.from_records(columns=columnns, data=extracted_rows)
 
 def parse_row(row):
     row_values = []
-    row_values.append(row.select('td')[0].select("div//a/@title").get()) # Name
-    row_values.append(row.select('td')[1].select("text()").get()) # Agex
-    row_values.append(row.select('td')[2].select("img/@title").get()) # Natx
-    row_values.append(row.select('td')[3].select("text()").get()) # Position
-    row_values.append(row.select('td')[4].select("text()").get()) # Position 2
-    row_values.append(row.select('td')[5].select("text()").get()) # mkt value
-    row_values.append(row.select('td')[6].select("a//img/@alt").get()) # Other Team
-    row_values.append(row.select('td')[7].select("img/@title").get()) # Other Team country
-    row_values.append(row.select('td')[8].select("a/text()").get()) # Transfer Value
+    row_values.append(row.select('td')[0].select("div/text()").get()) # Rank
+    row_values.append(row.select('td')[1].select("table//a/img/@title").get()) # Name
+    row_values.append(row.select('td')[2].select("text()").get()) # Birthday
+    row_values.append(row.select('td')[3].select("img//@title").get()) # nationality
+    row_values.append(row.select('td')[4].select("a//img/@alt").get()) # nation2
+    row_values.append(row.select('td')[5].select('text()').get()) # height
+    row_values.append(row.select('td')[6].select('text()').get()) # foot
+    row_values.append(row.select('td')[7].select('text()').get()) # start
+    row_values.append(row.select('td')[8].select('a//img/@alt').get()) # From
+    row_values.append(row.select('td')[9].select('text()').get()) # Contract until
+    row_values.append(row.select('td')[10].select('text()').get()) # value
     return row_values
 
 
+
 # Run this to go into shell interactive mode:
-# scrapy shell "https://www.transfermarkt.com/laliga/transfers/wettbewerb/ES1/plus/?saison_id=2010&s_w=&leihe=0&leihe=1&intern=0&intern=1"
+# scrapy shell "https://www.transfermarkt.co.uk/real-madrid/kader/verein/418/plus/1/galerie/0?saison_id=2008"
 
 # Scrapy examples: https://docs.scrapy.org/en/latest/intro/tutorial.html
 
